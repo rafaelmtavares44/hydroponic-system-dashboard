@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import Link from "next/link"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { SensorChart } from "@/components/sensor-chart"
 import { StatsPanel } from "@/components/stats-panel"
 import { NotificationPanel } from "@/components/notification-panel"
 import { HistoryPanel } from "@/components/history-panel"
-import { Droplets, Thermometer, Zap, Beaker, Activity, Send, RefreshCw } from "lucide-react"
+import { Droplets, Thermometer, Zap, Beaker, Activity, Send, RefreshCw, Wifi } from "lucide-react"
 
 interface SensorData {
   ph: number
@@ -155,6 +155,12 @@ export default function HydroponicDashboard() {
               </Badge>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <Link href="/live">
+                <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/10 bg-transparent">
+                  <Wifi className="h-4 w-4" />
+                  Modo Tempo Real (API)
+                </Button>
+              </Link>
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4" />
                 <span>Última atualização: {lastUpdate.toLocaleTimeString()}</span>

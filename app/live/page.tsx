@@ -11,7 +11,8 @@ import { StatsPanel } from "@/components/stats-panel"
 import { NotificationPanel } from "@/components/notification-panel"
 import { HistoryPanel } from "@/components/history-panel"
 import { SettingsForm } from "@/components/live/settings-form"
-import { Droplets, Thermometer, Zap, Beaker, Activity, RefreshCw, Wifi, WifiOff } from "lucide-react"
+import { Droplets, Thermometer, Zap, Beaker, Activity, RefreshCw, Wifi, WifiOff, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 interface SensorData {
   ph: number
@@ -117,6 +118,12 @@ export default function LiveDashboard() {
               </Badge>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <Link href="/">
+                <Button variant="ghost" className="gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar para Simulação
+                </Button>
+              </Link>
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4" />
                 <span>Última atualização: {lastUpdate ? lastUpdate.toLocaleTimeString() : "--:--:--"}</span>
