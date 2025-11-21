@@ -38,7 +38,7 @@ export function SettingsForm() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/config", {
+      const response = await fetch("http://10.231.249.65:8080/config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
