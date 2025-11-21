@@ -38,10 +38,15 @@ export default function LiveDashboard() {
   const [notifications, setNotifications] = useState<
     Array<{ id: string; message: string; type: "warning" | "error" | "info"; timestamp: Date }>
   >([])
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch("http://10.231.249.65:8080/api/dados")
+      const response = await fetch("http://10.231.249.65:8080/dados")
       if (!response.ok) throw new Error("Falha na conexão")
 
       const data = await response.json()
@@ -68,14 +73,12 @@ export default function LiveDashboard() {
     }
   }, [])
 
-  // Polling de dados a cada 5 segundos
   useEffect(() => {
     fetchData()
     const interval = setInterval(fetchData, 5000)
     return () => clearInterval(interval)
   }, [fetchData])
 
-  // Verificar alertas baseados nos dados reais
   useEffect(() => {
     if (!isConnected) return
 
@@ -110,7 +113,6 @@ export default function LiveDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -136,7 +138,9 @@ export default function LiveDashboard() {
               </Link>
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4" />
-                <span>Última atualização: {lastUpdate ? lastUpdate.toLocaleTimeString() : "--:--:--"}</span>
+                <span>
+                  Última atualização: {isMounted && lastUpdate ? lastUpdate.toLocaleTimeString() : "--:--:--"}
+                </span>
               </div>
               <Button variant="outline" size="sm" onClick={fetchData}>
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -152,7 +156,7 @@ export default function LiveDashboard() {
           <Alert variant="destructive" className="mb-6">
             <WifiOff className="h-4 w-4" />
             <AlertDescription>
-              Não foi possível conectar à API em http://10.231.249.65:8080/api/dados. Verifique se o servidor Flask está
+              Não foi possível conectar à API em http://10.231.249.65:8080/dados. Verifique se o servidor Flask está
               rodando e se o CORS está habilitado.
             </AlertDescription>
           </Alert>
@@ -167,7 +171,6 @@ export default function LiveDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Status Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -231,13 +234,11 @@ export default function LiveDashboard() {
               </Card>
             </div>
 
-            {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SensorChart data={sensorData} />
               <StatsPanel data={sensorData} />
             </div>
 
-            {/* Notifications */}
             <NotificationPanel notifications={notifications} />
           </TabsContent>
 
