@@ -41,7 +41,7 @@ export default function LiveDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch("http://10.231.249.65:8080/dados")
+      const response = await fetch("http://10.231.249.65:8080/api/dados")
       if (!response.ok) throw new Error("Falha na conexão")
 
       const data = await response.json()
