@@ -46,12 +46,22 @@ export default function LiveDashboard() {
 
       const data = await response.json()
 
-      setSensorData({
-        ...data,
-        timestamp: new Date(),
-      })
-      setLastUpdate(new Date())
-      setIsConnected(true)
+      if (Array.isArray(data) && data.length > 0) {
+        const latest = data[0]
+
+        setSensorData({
+          ph: latest.ph || 0,
+          salinity: latest.eletrocondutividade || 0, // Using EC as salinity proxy for now
+          temperature: latest.temperatura || 0,
+          humidity: latest.umidade || 0,
+          conductivity: latest.eletrocondutividade || 0,
+          timestamp: new Date(), // Using current time for live update
+        })
+        setLastUpdate(new Date())
+        setIsConnected(true)
+      } else {
+        console.warn("Formato de dados inesperado ou vazio", data)
+      }
     } catch (error) {
       console.error("Erro ao buscar dados:", error)
       setIsConnected(false)
@@ -142,7 +152,8 @@ export default function LiveDashboard() {
           <Alert variant="destructive" className="mb-6">
             <WifiOff className="h-4 w-4" />
             <AlertDescription>
-              Não foi possível conectar à API em http://10.231.249.65:8080. Verifique se o servidor Flask está rodando.
+              Não foi possível conectar à API em http://10.231.249.65:8080/api/dados. Verifique se o servidor Flask está
+              rodando e se o CORS está habilitado.
             </AlertDescription>
           </Alert>
         )}

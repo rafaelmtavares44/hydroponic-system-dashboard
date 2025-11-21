@@ -2,39 +2,57 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
-import { Save, Power, Timer, Droplets, RefreshCw } from "lucide-react"
+import { Save, Clock, Activity, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export function SettingsForm() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [isFetching, setIsFetching] = useState(true)
 
-  // Estado da Bomba
-  const [pumpMode, setPumpMode] = useState<"on" | "off" | "timer">("off")
-  const [timerMinutes, setTimerMinutes] = useState("15")
+  const [cycleMinutes, setCycleMinutes] = useState("60")
+  const [targetEC, setTargetEC] = useState("2.0")
 
-  // Estado da Salinidade
-  const [targetSalinity, setTargetSalinity] = useState("1.5")
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch("http://10.231.249.65:8080/api/config")
+        if (response.ok) {
+          const data = await response.json()
+          if (data) {
+            // Convert seconds to minutes for display if needed
+            // Assuming API sends seconds for CICLE_MINUTES based on Python code
+            if (data.CICLE_MINUTES) setCycleMinutes((data.CICLE_MINUTES / 60).toString())
+            if (data.eletrocondutividade_desejada) setTargetEC(data.eletrocondutividade_desejada.toString())
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar configurações:", error)
+        toast({
+          title: "Aviso",
+          description: "Não foi possível carregar as configurações atuais.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsFetching(false)
+      }
+    }
+    fetchConfig()
+  }, [toast])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     const configData = {
-      pump: {
-        mode: pumpMode,
-        timer_minutes: pumpMode === "timer" ? Number.parseInt(timerMinutes) : null,
-      },
-      salinity: {
-        target: Number.parseFloat(targetSalinity),
-      },
+      CICLE_MINUTES: Number.parseFloat(cycleMinutes) * 60, // Convert minutes back to seconds
+      eletrocondutividade_desejada: Number.parseFloat(targetEC),
     }
 
     try {
@@ -50,7 +68,7 @@ export function SettingsForm() {
 
       toast({
         title: "Configurações salvas",
-        description: "As alterações foram enviadas para o sistema.",
+        description: "Os parâmetros foram enviados para o sistema.",
       })
     } catch (error) {
       console.error("Erro:", error)
@@ -68,103 +86,66 @@ export function SettingsForm() {
     <Card>
       <CardHeader>
         <CardTitle>Configurações do Sistema</CardTitle>
-        <CardDescription>Controle de atuadores e parâmetros alvo</CardDescription>
+        <CardDescription>Ajuste os parâmetros de automação</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Controle da Bomba */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Ciclo de Circulação */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Power className="h-5 w-5 text-primary" />
-              <h3 className="font-medium text-lg">Bomba de Circulação</h3>
+              <Clock className="h-5 w-5 text-primary" />
+              <h3 className="font-medium text-lg">Ciclo de Circulação</h3>
             </div>
 
-            <RadioGroup
-              value={pumpMode}
-              onValueChange={(value) => setPumpMode(value as "on" | "off" | "timer")}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4"
-            >
-              <div>
-                <RadioGroupItem value="on" id="pump-on" className="peer sr-only" />
-                <Label
-                  htmlFor="pump-on"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                >
-                  <Power className="mb-3 h-6 w-6 text-green-500" />
-                  Sempre Ligada
-                </Label>
-              </div>
-
-              <div>
-                <RadioGroupItem value="off" id="pump-off" className="peer sr-only" />
-                <Label
-                  htmlFor="pump-off"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                >
-                  <Power className="mb-3 h-6 w-6 text-red-500" />
-                  Sempre Desligada
-                </Label>
-              </div>
-
-              <div>
-                <RadioGroupItem value="timer" id="pump-timer" className="peer sr-only" />
-                <Label
-                  htmlFor="pump-timer"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                >
-                  <Timer className="mb-3 h-6 w-6 text-blue-500" />
-                  Temporizador
-                </Label>
-              </div>
-            </RadioGroup>
-
-            {pumpMode === "timer" && (
-              <div className="mt-4 p-4 bg-muted/50 rounded-lg animate-in fade-in slide-in-from-top-2">
-                <Label htmlFor="timer-value">Tempo de Ativação (minutos)</Label>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <Label htmlFor="cycle-time">Tempo do Ciclo (minutos)</Label>
+              <div className="flex items-center gap-4 mt-2">
                 <Input
-                  id="timer-value"
+                  id="cycle-time"
                   type="number"
                   min="1"
-                  value={timerMinutes}
-                  onChange={(e) => setTimerMinutes(e.target.value)}
-                  className="mt-2 max-w-[200px]"
+                  value={cycleMinutes}
+                  onChange={(e) => setCycleMinutes(e.target.value)}
+                  className="max-w-[200px]"
+                  placeholder="60"
                 />
-                <p className="text-sm text-muted-foreground mt-1">
-                  A bomba ficará ligada por este período em ciclos pré-definidos.
-                </p>
+                <span className="text-sm text-muted-foreground">minutos</span>
               </div>
-            )}
+              <p className="text-sm text-muted-foreground mt-2">
+                A bomba alternará seu estado (ligado/desligado) a cada ciclo completado.
+              </p>
+            </div>
           </div>
 
           <Separator />
 
-          {/* Controle de Salinidade */}
+          {/* Eletrocondutividade */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Droplets className="h-5 w-5 text-primary" />
-              <h3 className="font-medium text-lg">Parâmetros Alvo</h3>
+              <Activity className="h-5 w-5 text-primary" />
+              <h3 className="font-medium text-lg">Controle de Nutrientes</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="salinity-target">Salinidade Desejada (ppt)</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="salinity-target"
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    value={targetSalinity}
-                    onChange={(e) => setTargetSalinity(e.target.value)}
-                  />
-                  <span className="text-sm text-muted-foreground w-12">ppt</span>
-                </div>
-                <p className="text-sm text-muted-foreground">O sistema alertará se a salinidade desviar deste valor.</p>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <Label htmlFor="target-ec">Eletrocondutividade Alvo</Label>
+              <div className="flex items-center gap-4 mt-2">
+                <Input
+                  id="target-ec"
+                  type="number"
+                  step="0.1"
+                  value={targetEC}
+                  onChange={(e) => setTargetEC(e.target.value)}
+                  className="max-w-[200px]"
+                  placeholder="2.0"
+                />
               </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Valor limite para acionar a reposição de nutrientes automaticamente.
+              </p>
             </div>
           </div>
 
-          <Button type="submit" className="w-full md:w-auto" disabled={isLoading}>
+          <Button type="submit" className="w-full md:w-auto" disabled={isLoading || isFetching}>
             {isLoading ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
