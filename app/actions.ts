@@ -1,6 +1,8 @@
 "use server"
 
-const API_BASE_URL = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
+export const API_BASE_URL = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
+
+const API_BASE_URL_OLD = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
 
 export async function fetchSensorData() {
   try {

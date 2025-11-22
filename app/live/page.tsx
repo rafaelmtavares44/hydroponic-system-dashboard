@@ -13,7 +13,7 @@ import { HistoryPanel } from "@/components/history-panel"
 import { SettingsForm } from "@/components/live/settings-form"
 import { Droplets, Thermometer, Beaker, Activity, RefreshCw, Wifi, WifiOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { fetchSensorData } from "@/app/actions"
+import { fetchSensorData, API_BASE_URL } from "@/app/actions"
 
 interface SensorData {
   ph: number
@@ -152,6 +152,11 @@ export default function LiveDashboard() {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Atualizar
               </Button>
+              <Button variant="destructive" size="sm" asChild>
+                <a href={`${API_BASE_URL}/api/dados`} target="_blank" rel="noopener noreferrer">
+                  Testar Conexão (Debug)
+                </a>
+              </Button>
             </div>
           </div>
         </div>
@@ -217,9 +222,8 @@ export default function LiveDashboard() {
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Umidade</CardTitle>
-                  <Droplets className="h-4 w-4 text-muted-foreground" />
+                <CardHeader>
+                  <CardTitle>Umidade</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{sensorData.humidity.toFixed(0)}%</div>
