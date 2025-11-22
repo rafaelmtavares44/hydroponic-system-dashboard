@@ -49,7 +49,11 @@ export default function LiveDashboard() {
   const fetchData = useCallback(async () => {
     try {
       console.log(`[Dashboard] Tentando conectar em: ${API_BASE_URL}/api/dados`)
-      const response = await fetch(`${API_BASE_URL}/api/dados`)
+      const response = await fetch(`${API_BASE_URL}/api/dados`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      })
 
       if (!response.ok) {
         console.error(`[Dashboard] Erro HTTP: ${response.status} ${response.statusText}`)

@@ -25,8 +25,13 @@ export function SettingsForm() {
     const fetchConfig = async () => {
       try {
         console.log(`[Settings] Buscando config em: ${API_BASE_URL}/api/config`)
-        const response = await fetch(`${API_BASE_URL}/api/config`)
-        // </CHANGE>
+
+        const response = await fetch(`${API_BASE_URL}/api/config`, {
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        })
+
         if (response.ok) {
           const data = await response.json()
           console.log("[Settings] Config recebida:", data)
@@ -67,10 +72,10 @@ export function SettingsForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify(configData),
       })
-      // </CHANGE>
 
       if (!response.ok) throw new Error("Falha ao salvar configurações")
 
