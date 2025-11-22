@@ -46,10 +46,16 @@ export default function LiveDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
+      console.log("[Dashboard] Tentando conectar em: http://10.231.249.65:8080/api/dados")
       const response = await fetch("http://10.231.249.65:8080/api/dados")
-      if (!response.ok) throw new Error("Falha na conexão")
+
+      if (!response.ok) {
+        console.error(`[Dashboard] Erro HTTP: ${response.status} ${response.statusText}`)
+        throw new Error(`Falha na conexão: ${response.status}`)
+      }
 
       const data = await response.json()
+      console.log("[Dashboard] Dados recebidos:", data)
 
       if (Array.isArray(data) && data.length > 0) {
         const latest = data[0]
@@ -65,10 +71,10 @@ export default function LiveDashboard() {
         setLastUpdate(new Date())
         setIsConnected(true)
       } else {
-        console.warn("Formato de dados inesperado ou vazio", data)
+        console.warn("[Dashboard] Formato de dados inesperado ou vazio", data)
       }
     } catch (error) {
-      console.error("Erro ao buscar dados:", error)
+      console.error("[Dashboard] Erro fatal ao buscar dados:", error)
       setIsConnected(false)
     }
   }, [])

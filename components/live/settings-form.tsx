@@ -22,9 +22,11 @@ export function SettingsForm() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
+        console.log("[Settings] Buscando config em: http://10.231.249.65:8080/api/config")
         const response = await fetch("http://10.231.249.65:8080/api/config")
         if (response.ok) {
           const data = await response.json()
+          console.log("[Settings] Config recebida:", data)
           if (data) {
             // Convert seconds to minutes for display if needed
             // Assuming API sends seconds for CICLE_MINUTES based on Python code
@@ -54,6 +56,8 @@ export function SettingsForm() {
       CICLE_MINUTES: Number.parseFloat(cycleMinutes) * 60, // Convert minutes back to seconds
       eletrocondutividade_desejada: Number.parseFloat(targetEC),
     }
+
+    console.log("[Settings] Enviando config:", configData)
 
     try {
       const response = await fetch("http://10.231.249.65:8080/api/config", {
