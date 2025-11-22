@@ -11,8 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Save, Clock, Activity, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-const API_BASE_URL = "http://10.231.249.65:8080"
-// </CHANGE>
+const API_BASE_URL = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
 
 export function SettingsForm() {
   const { toast } = useToast()

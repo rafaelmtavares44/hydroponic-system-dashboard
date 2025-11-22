@@ -23,8 +23,7 @@ interface SensorData {
   timestamp: Date
 }
 
-const API_BASE_URL = "http://10.231.249.65:8080"
-// </CHANGE>
+const API_BASE_URL = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
 
 export default function LiveDashboard() {
   const [sensorData, setSensorData] = useState<SensorData>({
@@ -51,7 +50,6 @@ export default function LiveDashboard() {
     try {
       console.log(`[Dashboard] Tentando conectar em: ${API_BASE_URL}/api/dados`)
       const response = await fetch(`${API_BASE_URL}/api/dados`)
-      // </CHANGE>
 
       if (!response.ok) {
         console.error(`[Dashboard] Erro HTTP: ${response.status} ${response.statusText}`)
@@ -168,7 +166,6 @@ export default function LiveDashboard() {
             <AlertDescription>
               Não foi possível conectar à API em {API_BASE_URL}/api/dados. Verifique se o servidor Flask está rodando e
               se o CORS está habilitado.
-              {/* </CHANGE> */}
             </AlertDescription>
           </Alert>
         )}
