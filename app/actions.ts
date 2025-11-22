@@ -18,6 +18,11 @@ export async function fetchSensorData() {
     if (contentType && contentType.includes("text/html")) {
       const text = await response.text()
       console.error("[Server Action] Recebeu HTML em vez de JSON (Provável erro do Ngrok):", text.substring(0, 200))
+
+      if (text.includes("ERR_NGROK_8012") || text.includes("dial tcp [::1]")) {
+        return { success: false, error: "ERRO IPV6: Reinicie o ngrok usando 'ngrok http 127.0.0.1:8080'" }
+      }
+
       return { success: false, error: "Erro de conexão com o Túnel (Ngrok)" }
     }
 
@@ -45,6 +50,13 @@ export async function fetchConfig() {
 
     const contentType = response.headers.get("content-type")
     if (contentType && contentType.includes("text/html")) {
+      const text = await response.text()
+      console.error("[Server Action] Recebeu HTML em vez de JSON (Provável erro do Ngrok):", text.substring(0, 200))
+
+      if (text.includes("ERR_NGROK_8012") || text.includes("dial tcp [::1]")) {
+        return { success: false, error: "ERRO IPV6: Reinicie o ngrok usando 'ngrok http 127.0.0.1:8080'" }
+      }
+
       return { success: false, error: "Erro de conexão com o Túnel (Ngrok)" }
     }
 
