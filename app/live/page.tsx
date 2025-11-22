@@ -46,7 +46,7 @@ export default function LiveDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch("bruno98fev.pythonanywhere.com/dados")
+      const response = await fetch("http://10.231.249.65:8080/api/dados")
       if (!response.ok) throw new Error("Falha na conexão")
 
       const data = await response.json()
@@ -156,7 +156,7 @@ export default function LiveDashboard() {
           <Alert variant="destructive" className="mb-6">
             <WifiOff className="h-4 w-4" />
             <AlertDescription>
-              Não foi possível conectar à API em http://10.231.249.65:8080/dados. Verifique se o servidor Flask está
+              Não foi possível conectar à API em http://10.231.249.65:8080/api/dados. Verifique se o servidor Flask está
               rodando e se o CORS está habilitado.
             </AlertDescription>
           </Alert>
