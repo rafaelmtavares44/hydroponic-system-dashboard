@@ -11,6 +11,9 @@ import { Separator } from "@/components/ui/separator"
 import { Save, Clock, Activity, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+const API_BASE_URL = "http://10.231.249.65:8080"
+// </CHANGE>
+
 export function SettingsForm() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
@@ -22,8 +25,9 @@ export function SettingsForm() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        console.log("[Settings] Buscando config em: http://10.231.249.65:8080/api/config")
-        const response = await fetch("http://10.231.249.65:8080/api/config")
+        console.log(`[Settings] Buscando config em: ${API_BASE_URL}/api/config`)
+        const response = await fetch(`${API_BASE_URL}/api/config`)
+        // </CHANGE>
         if (response.ok) {
           const data = await response.json()
           console.log("[Settings] Config recebida:", data)
@@ -60,13 +64,14 @@ export function SettingsForm() {
     console.log("[Settings] Enviando config:", configData)
 
     try {
-      const response = await fetch("http://10.231.249.65:8080/api/config", {
+      const response = await fetch(`${API_BASE_URL}/api/config`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(configData),
       })
+      // </CHANGE>
 
       if (!response.ok) throw new Error("Falha ao salvar configurações")
 

@@ -23,6 +23,9 @@ interface SensorData {
   timestamp: Date
 }
 
+const API_BASE_URL = "http://10.231.249.65:8080"
+// </CHANGE>
+
 export default function LiveDashboard() {
   const [sensorData, setSensorData] = useState<SensorData>({
     ph: 0,
@@ -46,8 +49,9 @@ export default function LiveDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      console.log("[Dashboard] Tentando conectar em: http://10.231.249.65:8080/api/dados")
-      const response = await fetch("http://10.231.249.65:8080/api/dados")
+      console.log(`[Dashboard] Tentando conectar em: ${API_BASE_URL}/api/dados`)
+      const response = await fetch(`${API_BASE_URL}/api/dados`)
+      // </CHANGE>
 
       if (!response.ok) {
         console.error(`[Dashboard] Erro HTTP: ${response.status} ${response.statusText}`)
@@ -162,8 +166,9 @@ export default function LiveDashboard() {
           <Alert variant="destructive" className="mb-6">
             <WifiOff className="h-4 w-4" />
             <AlertDescription>
-              Não foi possível conectar à API em http://10.231.249.65:8080/api/dados. Verifique se o servidor Flask está
-              rodando e se o CORS está habilitado.
+              Não foi possível conectar à API em {API_BASE_URL}/api/dados. Verifique se o servidor Flask está rodando e
+              se o CORS está habilitado.
+              {/* </CHANGE> */}
             </AlertDescription>
           </Alert>
         )}
