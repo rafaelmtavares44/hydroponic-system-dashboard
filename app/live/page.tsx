@@ -11,8 +11,9 @@ import { StatsPanel } from "@/components/stats-panel"
 import { NotificationPanel } from "@/components/notification-panel"
 import { HistoryPanel } from "@/components/history-panel"
 import { SettingsForm } from "@/components/live/settings-form"
-import { Droplets, Thermometer, Zap, Beaker, Activity, RefreshCw, Wifi, WifiOff, ArrowLeft } from "lucide-react"
+import { Droplets, Thermometer, Beaker, Activity, RefreshCw, Wifi, WifiOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { fetchSensorData } from "@/app/actions"
 
 interface SensorData {
   ph: number
@@ -22,8 +23,6 @@ interface SensorData {
   conductivity: number
   timestamp: Date
 }
-
-const API_BASE_URL = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
 
 export default function LiveDashboard() {
   const [sensorData, setSensorData] = useState<SensorData>({
@@ -48,19 +47,14 @@ export default function LiveDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      console.log(`[Dashboard] Tentando conectar em: ${API_BASE_URL}/api/dados`)
-      const response = await fetch(`${API_BASE_URL}/api/dados`, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      })
+      console.log(`[Dashboard] Buscando dados via Server Action...`)
+      const result = await fetchSensorData()
 
-      if (!response.ok) {
-        console.error(`[Dashboard] Erro HTTP: ${response.status} ${response.statusText}`)
-        throw new Error(`Falha na conexão: ${response.status}`)
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Falha na conexão")
       }
 
-      const data = await response.json()
+      const data = result.data
       console.log("[Dashboard] Dados recebidos:", data)
 
       if (Array.isArray(data) && data.length > 0) {
@@ -168,8 +162,7 @@ export default function LiveDashboard() {
           <Alert variant="destructive" className="mb-6">
             <WifiOff className="h-4 w-4" />
             <AlertDescription>
-              Não foi possível conectar à API em {API_BASE_URL}/api/dados. Verifique se o servidor Flask está rodando e
-              se o CORS está habilitado.
+              Não foi possível conectar à API. Verifique se o servidor Flask está rodando e se o CORS está habilitado.
             </AlertDescription>
           </Alert>
         )}
@@ -235,9 +228,8 @@ export default function LiveDashboard() {
               </Card>
 
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Condutividade</CardTitle>
-                  <Zap className="h-4 w-4 text-muted-foreground" />
+                <CardHeader>
+                  <CardTitle>Condutividade</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{sensorData.conductivity.toFixed(1)} mS/cm</div>

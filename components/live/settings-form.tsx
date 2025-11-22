@@ -10,8 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Save, Clock, Activity, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-
-const API_BASE_URL = "https://catchweight-kenton-distrustfully.ngrok-free.dev"
+import { fetchConfig, saveConfig } from "@/app/actions"
 
 export function SettingsForm() {
   const { toast } = useToast()
@@ -22,25 +21,21 @@ export function SettingsForm() {
   const [targetEC, setTargetEC] = useState("2.0")
 
   useEffect(() => {
-    const fetchConfig = async () => {
+    const loadConfig = async () => {
       try {
-        console.log(`[Settings] Buscando config em: ${API_BASE_URL}/api/config`)
+        console.log(`[Settings] Buscando config via Server Action...`)
 
-        const response = await fetch(`${API_BASE_URL}/api/config`, {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        })
+        const result = await fetchConfig()
 
-        if (response.ok) {
-          const data = await response.json()
+        if (result.success && result.data) {
+          const data = result.data
           console.log("[Settings] Config recebida:", data)
           if (data) {
-            // Convert seconds to minutes for display if needed
-            // Assuming API sends seconds for CICLE_MINUTES based on Python code
             if (data.CICLE_MINUTES) setCycleMinutes((data.CICLE_MINUTES / 60).toString())
             if (data.eletrocondutividade_desejada) setTargetEC(data.eletrocondutividade_desejada.toString())
           }
+        } else {
+          throw new Error(result.error)
         }
       } catch (error) {
         console.error("Erro ao carregar configurações:", error)
@@ -53,7 +48,7 @@ export function SettingsForm() {
         setIsFetching(false)
       }
     }
-    fetchConfig()
+    loadConfig()
   }, [toast])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,23 +56,16 @@ export function SettingsForm() {
     setIsLoading(true)
 
     const configData = {
-      CICLE_MINUTES: Number.parseFloat(cycleMinutes) * 60, // Convert minutes back to seconds
+      CICLE_MINUTES: Number.parseFloat(cycleMinutes) * 60,
       eletrocondutividade_desejada: Number.parseFloat(targetEC),
     }
 
     console.log("[Settings] Enviando config:", configData)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/config`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-        body: JSON.stringify(configData),
-      })
+      const result = await saveConfig(configData)
 
-      if (!response.ok) throw new Error("Falha ao salvar configurações")
+      if (!result.success) throw new Error(result.error || "Falha ao salvar")
 
       toast({
         title: "Configurações salvas",
@@ -103,7 +91,6 @@ export function SettingsForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Ciclo de Circulação */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-primary" />
@@ -132,7 +119,6 @@ export function SettingsForm() {
 
           <Separator />
 
-          {/* Eletrocondutividade */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
